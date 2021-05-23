@@ -1,11 +1,15 @@
 package com.load.service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.load.entities.Payload;
 import com.load.model.PayloadRequest;
@@ -15,6 +19,7 @@ import com.load.dao.PayloadRepository;
 import com.load.model.PayloadResponse;
 
 import com.load.constantmessage.Constants;
+import org.springframework.data.domain.Sort;
 
 @Service
 public class loadServiceImpl implements loadService {
@@ -163,6 +168,19 @@ public class loadServiceImpl implements loadService {
 	loadResponse.setStatus(Constants.deleteSuccess);
 	return loadResponse;
 	
+	}
+
+
+	@Override
+	public Page<Payload> getAllPayloads(@RequestParam Optional<Integer> page,
+            @RequestParam Optional<String> sortBy) {
+		
+		return payloadRepository.findAll(PageRequest.of(
+                page.orElse(0),
+                2,
+                Sort.Direction.ASC, 
+                sortBy.orElse("id")
+        ));
 	}
 
 

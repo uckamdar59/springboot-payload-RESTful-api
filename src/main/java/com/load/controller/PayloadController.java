@@ -1,8 +1,12 @@
 package com.load.controller;
 
 import com.load.service.loadService;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,12 +33,16 @@ public class PayloadController {
 	private loadService load_service;
 	
 
-	@GetMapping("/load")
-	public Payload getLoadsById(@RequestParam(name="id",required=false) String id){
+	@GetMapping("/load/{id}")
+	public Payload getLoadsById(@PathVariable(value = "id") String id){
 		return load_service.getPayloadById(id);
 	}
 	
-
+	@GetMapping("/load")
+	public Page<Payload> getAllPayloads(@RequestParam Optional<Integer> page,
+            @RequestParam Optional<String> sortBy){
+		return load_service.getAllPayloads(page,sortBy);
+	}
 	
 	@PostMapping("/load")
 	public PayloadResponse payloadResponse(@RequestBody PayloadRequest payloadrequest) {
