@@ -1,24 +1,27 @@
 package com.load.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.load.service.loadService;
 
-import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.load.model.Payload;
-import com.load.repository.PayloadRepository;
-import com.load.exception.ResourceNotFoundException;
+
+import com.load.entities.Payload;
+
+import com.load.model.PayloadRequest;
+import com.load.model.PayloadResponse;
+
 
 
 
@@ -27,73 +30,38 @@ public class PayloadController {
 
 	
 	@Autowired
-	private PayloadRepository payloadRepository;
+	private loadService load_service;
+	
 
+	@GetMapping("/load/{id}")
+	public Payload getLoadsById(@PathVariable(value = "id") String id){
+		return load_service.getPayloadById(id);
+	}
+	
 	@GetMapping("/load")
-	public List<Payload> getAllPayloads() {
-		return payloadRepository.findAll();
+	public Page<Payload> getAllPayloads(@RequestParam Optional<Integer> page,
+            @RequestParam Optional<String> sortBy){
+		return load_service.getAllPayloads(page,sortBy);
 	}
-	
-	
-	
-	
-	@GetMapping("/load/{loadId}")
-	public ResponseEntity<Payload> getPayloadById(@PathVariable(value = "loadId") Long payloadId)
-			throws ResourceNotFoundException {
-		Payload Payload = payloadRepository.findById(payloadId)
-				.orElseThrow(() -> new ResourceNotFoundException("Payload details not found for this id :: " + payloadId));
-		return ResponseEntity.ok().body(Payload);
-	
-	}
-	
-	
 	
 	@PostMapping("/load")
-	public Map<String, Boolean> createPayload(@Valid @RequestBody Payload payload) {
-		payloadRepository.save(payload);
-		Map<String, Boolean> response = new HashMap<>();
-		response.put("loads details added successfully", Boolean.TRUE);
-		return response;
+	public PayloadResponse payloadResponse(@RequestBody PayloadRequest payloadrequest) {
+		return load_service.createPayload(payloadrequest);
+	}
+
+	
+	@PutMapping("/load/{id}")
+	public PayloadResponse updatePayloadResponse(@PathVariable(value = "id") String id,@RequestBody PayloadRequest payloadrequest) {
 		
+		return load_service.updatePayload(id,payloadrequest);
 		
 	}
-	
-	
-	
-	@PutMapping("/load/{loadId}")
-	public ResponseEntity<Payload> updatePayload(@PathVariable(value = "loadId") Long payloadId,
-			@Valid @RequestBody Payload payloadDetails) throws ResourceNotFoundException {
-		Payload payload = payloadRepository.findById(payloadId)
-				.orElseThrow(() -> new ResourceNotFoundException("Payload details not found for this id :: " + payloadId));
 
-		
-		payload.setLoadingPoint(payloadDetails.getLoadingPoint());
-		payload.setUnloadingPoint(payloadDetails.getUnloadingPoint());
-		payload.setProductType(payloadDetails.getProductType());
-		payload.setTruckType(payloadDetails.getTruckType());
-		payload.setNoOfTrucks(payloadDetails.getNoOfTrucks());
-		payload.setWeight(payloadDetails.getWeight());
-		payload.setComment(payloadDetails.getComment());
-		payload.setDate(payloadDetails.getDate());
-		
-		
-		
-		final Payload updatedPayload = payloadRepository.save(payload);
-		return ResponseEntity.ok(updatedPayload);
-	}
 	
-	
-	
-	@DeleteMapping("/load/{loadId}")
-	public Map<String, Boolean> deletePayload(@PathVariable(value = "loadId") Long payloadId)
-			throws ResourceNotFoundException {
-		Payload payload = payloadRepository.findById(payloadId)
-				.orElseThrow(() -> new ResourceNotFoundException("Payload details not found for this id :: " + payloadId));
-
-		payloadRepository.delete(payload);
-		Map<String, Boolean> response = new HashMap<>();
-		response.put("deleted", Boolean.TRUE);
-		return response;
+	@DeleteMapping("/load/{id}")
+	public void deletePayload(@PathVariable(value = "id") String id) {
+			load_service.deletePayload(id);
+		
 	}
 	
 }
